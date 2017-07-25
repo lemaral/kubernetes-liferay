@@ -1,0 +1,73 @@
+---
+#Service for mail
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cerebri.service: mail
+  name: mail
+spec:
+  clusterIP: None
+  ports:
+  - name: headless
+    port: 55555
+    targetPort: 0
+  selector:
+    cerebri.service: mail
+---
+#Deployment for mail
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    cerebri.service: mail
+  name: mail
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        cerebri.service: mail
+    spec:
+      containers:
+      - env:
+        - name: SERVICE_NAME
+          value: smtp
+        - name: maildomain
+          value: muellerinc.com
+        - name: smtp_user
+          value: noreply:Cerebri01
+        - name: STATICA_URL
+          value: socks5://statica3986:6d49e9578e32ddaf@sl-ams-01-guido.statica.io:1080
+        image: cerebriai/postfix
+        name: mail
+        resources: {}
+        volumeMounts:
+        - mountPath: /etc/opendkim/domainkeys
+          name: liferay-mail-dkim
+      restartPolicy: Always
+      volumes:
+      - name: liferay-mail-dkim
+        persistentVolumeClaim:
+          claimName: liferay-mail-dkim
+      imagePullSecrets:
+        - name: cerebri-registry
+---
+#Persistent Volume Claim for mail
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: liferay-mail-dkim
+  name: liferay-mail-dkim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  selector:
+    matchLabels:
+      assign-to: mail-dkim
+  resources:
+    requests:
+      storage: 100Mi

@@ -1,0 +1,16 @@
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: web
+    labels:
+      assign-to: web
+  spec:
+    capacity:
+      storage: 1Gi
+    accessModes:
+      - ReadWriteOnce
+    persistentVolumeReclaimPolicy: Recycle
+    #storageClassName: default
+    nfs:
+      path: /mykube/web
+      server: 169.48.64.247

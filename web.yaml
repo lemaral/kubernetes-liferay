@@ -1,0 +1,61 @@
+---
+#Service for web
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    cerebri.service: web
+  name: web
+spec:
+  type: NodePort
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: 80
+  - name: "443"
+    port: 443
+    targetPort: 443
+  selector:
+    cerebri.service: web
+---
+#Deployment for web
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  labels:
+    cerebri.service: web
+  name: web
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        cerebri.service: web
+    spec:
+      containers:
+      - env:
+        - name: SITE_NAME
+          value: mueller-qa.cerebri.systems
+        - name: SELFSIGNED_CERT
+          value: "false"
+        image: cerebriai/httpd:supervisord-ps
+        name: web
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources:
+          limits:
+            memory: 4Gi
+        volumeMounts:
+        - mountPath: /etc/letsencrypt
+          name: web-claim0
+      restartPolicy: Always
+      volumes:
+      - name: web-claim0
+        persistentVolumeClaim:
+          claimName: web-claim0
+      imagePullSecrets:
+      - name: cerebri-registry
+---

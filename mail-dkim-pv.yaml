@@ -1,0 +1,16 @@
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: mail-dkim
+    labels:
+      assign-to: mail-dkim
+  spec:
+    capacity:
+      storage: 1Gi
+    accessModes:
+      - ReadWriteOnce
+    persistentVolumeReclaimPolicy: Recycle
+    #storageClassName: default
+    nfs:
+      path: /mykube/mail-dkim
+      server: 169.48.64.247

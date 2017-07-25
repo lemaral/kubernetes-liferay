@@ -1,0 +1,67 @@
+---
+#Service for Persona-Ranker
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cerebri.service: persona-ranker
+  name: persona-ranker
+spec:
+  clusterIP: None
+  ports:
+  - name: headless
+    port: 55555
+    targetPort: 0
+  selector:
+    cerebri.service: persona-ranker
+---
+#Deployment for Persona-Ranker
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    cerebri.service: persona-ranker
+  name: persona-ranker
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        cerebri.service: persona-ranker
+    spec:
+      containers:
+      - env:
+        - name: FLASK_WATSON_URL
+          value: http://flask-watson:8080
+        image: cerebriai/caimp-ee-personaranker
+        name: persona-ranker
+        resources: {}
+        volumeMounts:
+        - mountPath: /logs
+          name: persona-ranker-logs
+      restartPolicy: Always
+      volumes:
+      - name: persona-ranker-logs
+        persistentVolumeClaim:
+          claimName: persona-ranker-logs
+      imagePullSecrets:
+        - name: cerebri-registry
+---
+#Persistent Volume Claim for Person-Ranker
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: persona-ranker-logs
+  name: persona-ranker-logs
+spec:
+  accessModes:
+  - ReadWriteOnce
+  selector:
+    matchLabels:
+      assign-to: persona-rankerlogs
+  resources:
+    requests:
+      storage: 100Mi

@@ -1,0 +1,102 @@
+---
+#Service for node3
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cerebri.service: node3
+  name: node3
+spec:
+  ports:
+  - name: "8083"
+    port: 8083
+    targetPort: 8081
+  - name: "2181"
+    port: 2181
+    targetPort: 2181
+  - name: "2888"
+    port: 2888
+    targetPort: 2888
+  - name: "3888"
+    port: 3888
+    targetPort: 3888
+  - name: "4000"
+    port: 4000
+    targetPort: 4000
+  - name: "8009"
+    port: 8009
+    targetPort: 8009
+  - name: "7500"
+    port: 7500
+    targetPort: 7500
+  - name: "8080"
+    port: 8080
+    targetPort: 8080
+  selector:
+    cerebri.service: node3
+---
+#Pod for node3
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    cerebri.service: node3
+  name: node3
+spec:
+      containers:
+      - env:
+        - name: ZK_NODE_IP
+          value: node1
+        - name: ZK_SLEEP
+          value: "30"
+        - name: SERVER_MEM
+          value: 3g
+        - name: DB_ENDPOINT
+          value: jdbc:postgresql://postgres:5432/liferay
+        - name: DB_USER
+          value: admin
+        - name: DB_PASS
+          value: 1q2q2w3w
+        - name: LDAP_URL
+          value: ldaps://ad.cerebri.systems:636
+        - name: LDAP_BASE
+          value: '"CN=Users,DC=cerebri,DC=systems"'
+        - name: LDAP_USER
+          value: '"CEREBRI\Administrator"'
+        - name: LDAP_PASS
+          value: '"Zcb&?*@bY?"'
+        - name: COMPANY_NAME
+          value: MuellerInc_QA
+        - name: COMPANY_ID
+          value: mueller-qa.com
+        - name: WEB_SERVER
+          value: mueller-qa.cerebri.systems
+        image: cerebriai/liferay:CE-6.2.5-PROD-qa
+        name: node3
+        ports:
+        - containerPort: 8081
+        - containerPort: 2181
+        - containerPort: 2888
+        - containerPort: 3888
+        - containerPort: 4000
+        - containerPort: 7500
+        - containerPort: 8089
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "4294967296"
+        volumeMounts:
+        - mountPath: /opt/liferay/data
+          name: liferay-data
+        - mountPath: /opt/liferay/deploy
+          name: liferay-deploy3
+      restartPolicy: Always
+      volumes:
+      - name: liferay-data
+        persistentVolumeClaim:
+          claimName: liferay-data
+      - name: liferay-deploy3
+        persistentVolumeClaim:
+          claimName: liferay-deploy3
+      imagePullSecrets:
+        - name: cerebri-registry

@@ -1,0 +1,16 @@
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: persona-rankerlogs
+    labels:
+      assign-to: persona-rankerlogs
+  spec:
+    capacity:
+      storage: 1Gi
+    accessModes:
+      - ReadWriteOnce
+    persistentVolumeReclaimPolicy: Recycle
+    #storageClassName: default
+    nfs:
+      path: /mykube/persona-rankerlogs
+      server: 169.48.64.247

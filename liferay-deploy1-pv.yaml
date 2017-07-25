@@ -1,0 +1,18 @@
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: liferay-deploy1
+    annotations: 
+      pv.beta.kubernetes.io/gid: "liferay"
+    labels:
+      assign-to: liferay-deploy1
+  spec:
+    capacity:
+      storage: 1Gi
+    accessModes:
+      - ReadWriteMany
+    persistentVolumeReclaimPolicy: Recycle
+    #storageClassName: default
+    nfs:
+      path: /mykube/liferay-deploy1
+      server: 169.48.64.247

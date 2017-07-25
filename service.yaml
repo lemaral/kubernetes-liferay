@@ -1,0 +1,164 @@
+---
+#Service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cerebri.service: service
+  name: service
+spec:
+  clusterIP: None
+  ports:
+  - name: headless
+    port: 55555
+    targetPort: 0
+  selector:
+    cerebri.service: service
+---
+#Deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    cerebri.service: service
+  name: service
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        cerebri.service: service
+    spec:
+      containers:
+      - env:
+        - name: BACKUP_DESTINATION
+          value: file:///opt/backup
+        - name: DELETE_OLDER_THAN
+          value: 1M
+        - name: DB_ENDPOINT
+          value: postgresql://admin:1q2q2w3w@postgres:5432/liferay
+        - name: BOOTSTRAP_WITH
+          value: "20161219"
+        image: cerebriai/liferay-services
+        imagePullPolicy: Always
+        name: service
+        resources:
+          limits:
+            memory: "536870912"
+        volumeMounts:
+        - mountPath: /opt/liferay/data
+          name: liferay-data
+        - mountPath: /opt/deploy
+          name: liferay-deploy
+        - mountPath: /opt/deploy1
+          name: liferay-deploy1
+        - mountPath: /opt/deploy2
+          name: liferay-deploy2
+        - mountPath: /opt/deploy3
+          name: liferay-deploy3
+      restartPolicy: Always
+      volumes:
+      - name: liferay-data
+        persistentVolumeClaim:
+          claimName: liferay-data
+      - name: liferay-deploy
+        persistentVolumeClaim:
+          claimName: liferay-deploy
+      - name: liferay-deploy1
+        persistentVolumeClaim:
+          claimName: liferay-deploy1
+      - name: liferay-deploy2
+        persistentVolumeClaim:
+          claimName: liferay-deploy2
+      - name: liferay-deploy3
+        persistentVolumeClaim:
+          claimName: liferay-deploy3
+      imagePullSecrets:
+        - name: cerebri-registry
+---
+#PersistentVolumeClaim - liferay-data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: liferay-data
+  name: liferay-data
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+  selector:
+    matchLabels:
+      assign-to: liferay-data
+---
+#PersistentVolumeClaim - liferay-deploy
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: liferay-deploy
+  name: liferay-deploy
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+  selector:
+    matchLabels:
+      assign-to: liferay-deploy
+---
+#PersistentVolumeClaim - liferay-deploy1
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: liferay-deploy1
+  name: liferay-deploy1
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+  selector:
+    matchLabels:
+      assign-to: liferay-deploy1
+---
+#PersistentVolumeClaim - liferay-deploy2
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: liferay-deploy2
+  name: liferay-deploy2
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+  selector:
+    matchLabels:
+      assign-to: liferay-deploy2
+---
+#PersistentVolumeClaim - liferay-deploy3
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: liferay-deploy3
+  name: liferay-deploy3
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+  selector:
+    matchLabels:
+      assign-to: liferay-deploy3

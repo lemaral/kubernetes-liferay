@@ -1,0 +1,16 @@
+#Persistent Volume Claim for web
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: web-claim0
+  name: web-claim0
+spec:
+  accessModes:
+  - ReadWriteOnce
+  selector:
+    matchLabels:
+      assign-to: web
+  resources:
+    requests:
+      storage: 100Mi

@@ -1,0 +1,75 @@
+---
+#Service for flask-watson
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cerebri.service: flask-watson
+  name: flask-watson
+spec:
+  clusterIP: None
+  ports:
+  - name: headless
+    port: 55555
+    targetPort: 0
+  selector:
+    cerebri.service: flask-watson
+---
+#Deployment for flask-watson
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    cerebri.service: flask-watson
+  name: flask-watson
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        cerebri.service: flask-watson
+    spec:
+      containers:
+      - env:
+        - name: PIPassword
+          value: ZYYx4XF4VP6Z
+        - name: PIUrl
+          value: https://gateway.watsonplatform.net/personality-insights/api
+        - name: PIUsername
+          value: df6987fe-eee3-45ee-aad3-579e17720907
+        - name: TW_CONSUMER_KEY
+          value: s3aIJwCTbYyMWya16Zo7afNNB
+        - name: TW_CONSUMER_SECRET
+          value: nW7WohWMm4u2gU3byrOVZTprCX2v5bPP9IXwRYTRjYD01GiLXZ
+        image: cerebriai/flask-watson
+        name: flask-watson
+        resources: {}
+        volumeMounts:
+        - mountPath: /logs
+          name: flask-watson-logs
+      restartPolicy: Always
+      volumes:
+      - name: flask-watson-logs
+        persistentVolumeClaim:
+          claimName: flask-watson-logs
+      imagePullSecrets:
+        - name: cerebri-registry
+---
+#Persistent Volume Claim for flask-watson
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: flask-watson-logs
+  name: flask-watson-logs
+spec:
+  accessModes:
+  - ReadWriteOnce
+  selector:
+    matchLabels:
+      assign-to: flask-watsonlogs
+  resources:
+    requests:
+      storage: 100Mi

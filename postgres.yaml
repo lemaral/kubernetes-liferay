@@ -1,0 +1,76 @@
+---
+#Service for Postgres
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cerebri.service: postgres
+  name: postgres
+spec:
+  ports:
+  - name: "5432"
+    port: 5432
+    targetPort: 5432
+  selector:
+    cerebri.service: postgres
+---
+#Deployment for Postgres
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    cerebri.service: postgres
+  name: postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        cerebri.service: postgres
+    spec:
+      containers:
+      - env:
+        - name: DEBUG
+          value: "false"
+        - name: DB_USER
+          value: admin
+        - name: DB_PASS
+          value: 1q2q2w3w
+        - name: DB_NAME
+          value: liferay
+        - name: PG_TRUST_LOCALNET
+          value: "true"
+        image: cerebriai/postgres
+        name: postgres
+        ports:
+        - containerPort: 5432
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/postgresql
+          name: liferay-postgress
+      restartPolicy: Always
+      volumes:
+      - name: liferay-postgress
+        persistentVolumeClaim:
+          claimName: liferay-postgress
+      imagePullSecrets:
+        - name: cerebri-registry
+---
+#Persistent Volume Claim for Postgres
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    cerebri.service: liferay-postgress
+  name: liferay-postgress
+spec:
+  accessModes:
+  - ReadWriteMany
+  selector:
+    matchLabels:
+      assign-to: liferay-postgress
+  resources:
+    requests:
+      storage: 1Gi
